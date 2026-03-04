@@ -1,0 +1,59 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.output-container {
+  margin-top: 2rem;
+  text-align: left;
+  max-width: 100%;
+  overflow: auto;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 1rem;
+  background-color: #1a1a1a;
+}
+
+.output-container pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: monospace;
+  font-size: 0.9rem;
+  color: #ddd;
+}
+
+.json-key {
+  color: #569cd6; /* Blue for keys */
+}
+
+.json-string {
+  color: #ce9178; /* Orange for strings */
+}
+
+.json-number {
+  color: #b5cea8; /* Green for numbers */
+}
+
+.json-boolean {
+  color: #569cd6; /* Blue for booleans */
+}
+
+.json-null {
+  color: #569cd6; /* Blue for null */
+}
+
+.json-object,
+.json-array {
+  cursor: pointer; /* For collapsibility */
+}
+
+.collapsed::after {
+  content: ' {...}'; /* Indicator for collapsed objects */
+  color: #888;
+}
+
+.collapsed .json-children {
+  display: none;
+}
