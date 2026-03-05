@@ -61,6 +61,7 @@ function App() {
     setResult(null);
 
     try {
+      //Creates a FormData object (for sending files via HTTP) and appends the selected file to it under the key "file". 
       const formData = new FormData();
       formData.append("file", file);
 
