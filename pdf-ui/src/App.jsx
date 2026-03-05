@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "./App.css"; // Assuming you put the new styles here
+import "./App.css"; // Assuming styles are here
 
 function JsonViewer({ data, indent = 0 }) {
   const [expanded, setExpanded] = useState(true);
@@ -46,11 +46,12 @@ function JsonViewer({ data, indent = 0 }) {
 
 function App() {
   const [file, setFile] = useState(null);
-  const [result, setResult] = useState(null); // Store parsed data instead of text
+  const [result, setResult] = useState(null); // For JSON preview
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [outputType, setOutputType] = useState("json"); // New: Dropdown state
 
-  const handleUpload = async () => {
+  const handleAction = async () => {
     if (!file) {
       alert("Choose a PDF first");
       return;
@@ -61,11 +62,36 @@ function App() {
     setResult(null);
 
     try {
-      //Creates a FormData object (for sending files via HTTP) and appends the selected file to it under the key "file". 
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch("http://localhost:8080/upload", {
+      let endpoint = "/upload";
+      let isDownload = false;
+      let filename = "";
+
+      switch (outputType) {
+        case "txt":
+          endpoint = "/download-text";
+          isDownload = true;
+          filename = "extracted-text.txt";
+          break;
+        case "images":
+          endpoint = "/extract-images";
+          isDownload = true;
+          filename = "pdf-pages.zip";
+          break;
+        case "docx":
+          endpoint = "/convert-to-docx";
+          isDownload = true;
+          filename = "converted.docx";
+          break;
+        case "json":
+        default:
+          // Keep as /upload for JSON preview
+          break;
+      }
+
+      const response = await fetch(`http://localhost:8080${endpoint}`, {
         method: "POST",
         body: formData,
       });
@@ -75,8 +101,22 @@ function App() {
         throw new Error(`Backend error ${response.status}: ${errText}`);
       }
 
-      const data = await response.json();
-      setResult(data); // Store the raw JSON data
+      if (isDownload) {
+        // Handle file download
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } else {
+        // Handle JSON preview
+        const data = await response.json();
+        setResult(data.result); // Assuming backend wraps in {result: {...}}
+      }
     } catch (err) {
       console.error(err);
       setError(String(err));
@@ -95,26 +135,22 @@ function App() {
         onChange={(e) => setFile(e.target.files[0])}
       />
 
-      <button onClick={handleUpload} disabled={loading}>
-        {loading ? "Uploading..." : "Upload"}
+      <select value={outputType} onChange={(e) => setOutputType(e.target.value)}>
+        <option value="json">Extract & Preview JSON</option>
+        <option value="txt">Download Text (TXT)</option>
+        <option value="images">Extract Images (ZIP)</option>
+        <option value="docx">Convert to DOCX</option>
+      </select>
+
+      <button onClick={handleAction} disabled={loading}>
+        {loading ? "Processing..." : "Process"}
       </button>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      {result && (
+      {result && outputType === "json" && (
         <div className="output-container">
-          {result.text ? (
-            // If there's a plain 'text' field, render it nicely
-            <div>
-              <h2>Extracted Text:</h2>
-              <pre>{result.text}</pre>
-              <h2>Metadata:</h2>
-              <JsonViewer data={result} />
-            </div>
-          ) : (
-            // Otherwise, render full JSON
-            <JsonViewer data={result} />
-          )}
+          <JsonViewer data={result} />
         </div>
       )}
     </div>
