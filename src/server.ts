@@ -16,7 +16,7 @@ app.use(
 
 app.get("/", (_req, res) => res.send("backend is running"));
 
-// Better file upload config (still uses memory/buffer, no temp files needed)
+// file upload config / It uses a buffer
 app.use(
   fileUpload({
     limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB
@@ -63,7 +63,6 @@ app.post("/upload", async (req: Request, res: Response) => {
   }
 });
 
-// ==================== NEW ENDPOINTS ====================
 
 // 1. Download extracted text as .txt
 app.post("/download-text", async (req: Request, res: Response) => {
@@ -87,7 +86,7 @@ app.post("/download-text", async (req: Request, res: Response) => {
   }
 });
 
-// 2. Extract all pages as PNGs → download as ZIP
+// 2. Extract all pages as PNGs and download as ZIP
 app.post("/extract-images", async (req: Request, res: Response) => {
   let parser: PDFParse | null = null;
   try {
@@ -117,7 +116,7 @@ app.post("/extract-images", async (req: Request, res: Response) => {
   }
 });
 
-// 3. Convert to simple DOCX (using extracted text – good layout for text-heavy PDFs)
+// 3. Convert to simple DOCX
 app.post("/convert-to-docx", async (req: Request, res: Response) => {
   let parser: PDFParse | null = null;
   try {
@@ -128,7 +127,7 @@ app.post("/convert-to-docx", async (req: Request, res: Response) => {
     const textResult = await parser.getText();
     const text = textResult?.text || "No text found";
 
-    // Create nice DOCX with paragraphs
+    
     const paragraphs = text
       .split(/\n\n+/) // split on blank lines
       .filter(p => p.trim())
