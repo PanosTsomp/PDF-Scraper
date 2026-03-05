@@ -1,151 +1,138 @@
-# PDF Text Extractor
+# PDF Scraper
 
-This project is a small full-stack PDF text extraction app.
+A full-stack PDF processing app with:
+- A TypeScript + Express backend (`src/server.ts`)
+- A React + Vite frontend (`pdf-ui/`)
 
-It has two parts:
-
-- A Node.js + Express backend in the project root
-- A React + Vite frontend inside `pdf-ui/`
-
-The backend receives a PDF file, extracts its text with `pdf-parse`, and returns the parsed result as JSON.  
-The frontend lets you choose a PDF, send it to the backend, and display the extracted text in the browser.
+You can upload a PDF and choose one of these outputs:
+- JSON preview (text + metadata)
+- Download extracted text as `.txt`
+- Download rendered pages as `.zip` of `.png` images
+- Download converted `.docx`
 
 ## Project Structure
 
 ```text
-Tsomp_Portfolio/
+PDF-Scraper/
 ├── src/
-│   └── server.ts
+│   ├── server.ts
+│   └── server.js
 ├── pdf-ui/
 │   ├── src/
 │   │   ├── App.jsx
 │   │   ├── App.css
-│   │   └── index.css
+│   │   └── main.jsx
 │   └── package.json
 ├── package.json
 └── README.md
 ```
 
+## Backend API
 
-# Backend
-The backend is implemented in `src/server.ts`.
+Base URL: `http://localhost:8080`
 
-Main responsibilities:
+- `GET /`
+  - Health check response: `backend is running`
+- `POST /upload`
+  - Input: multipart/form-data with `file` (PDF)
+  - Output: JSON with extracted text + PDF info
+- `POST /download-text`
+  - Input: multipart/form-data with `file` (PDF)
+  - Output: downloadable `extracted-text.txt`
+- `POST /extract-images`
+  - Input: multipart/form-data with `file` (PDF)
+  - Output: downloadable `pdf-pages.zip`
+- `POST /convert-to-docx`
+  - Input: multipart/form-data with `file` (PDF)
+  - Output: downloadable `converted.docx`
 
-- Start an Express server on port 8080
-- Allow requests from the frontend using CORS
-- Accept uploaded files using express-fileupload
-- Read the uploaded PDF as binary data
-- Extract text and metadata using pdf-parse
-- Return the result as JSON
-- Backend Flow
-- The frontend sends a POST request to /upload
-- The request contains a PDF file in multipart/form-data
-- The backend checks that a file exists in req.files.file
-- The file buffer is converted to a Uint8Array
-- PDFParse extracts the text, metadata, and page count
-- The backend responds with JSON like this:
+### Backend Notes
 
-# Frontend
-The frontend is implemented in `pdf-ui/src/App.jsx`.
+- CORS allows `http://localhost:5173`
+- Upload limit is `50MB`
+- Uploaded field name must be `file`
+- PDF parser instances are explicitly destroyed to avoid memory leaks
 
-Main responsibilities:
+## Frontend
 
-- Let the user pick a PDF file
-- Send the file to the backend using fetch
-- Read the backend JSON response
-- Display the extracted text in the UI
-- Show loading or error feedback
-- Frontend Flow
-- The user selects a PDF file from the file input
-- The app stores that file in React state
-- When the user clicks the extract button:
-- A FormData object is created
-- The file is appended under the key "file"
-- The frontend sends the request to http://localhost:8080/upload
-- The backend returns JSON
-- The frontend reads data.result.text
-- The extracted text is rendered on the page
+The frontend (`pdf-ui/src/App.jsx`) provides:
+- PDF file picker
+- Output type selector
+- One-click processing
+- JSON preview for `/upload`
+- Browser download flow for TXT/ZIP/DOCX endpoints
 
-# Technologies Used
-Backend
-Node.js
-TypeScript
-Express
-express-fileupload
-cors
-pdf-parse
-nodemon
-ts-node
-Frontend
-React
-Vite
-JavaScript (JSX)
-CSS
+## Setup
 
-# How To Run The Project
-You need two terminals: one for the backend and one for the frontend.
+### 1) Install backend dependencies
 
-### Run the Backend
-From the project root:
+From project root:
 
-```
+```bash
 npm install
-npm run dev
-The backend runs on:
-
-http://localhost:8080
-You can test it in the browser at:
-
-http://localhost:8080/
-You should see:
-
-backend is running
 ```
 
-### Run the Frontend
-Open a second terminal and move into the frontend folder:
+### 2) Install frontend dependencies
 
-```
+```bash
 cd pdf-ui
 npm install
+```
+
+## Run in Development
+
+You need two terminals.
+
+### Terminal A: backend
+
+From project root:
+
+```bash
 npm run dev
-Vite starts the frontend on:
+```
 
-http://localhost:5173
-Open that URL in the browser and use the interface to upload a PDF.
+Backend runs on `http://localhost:8080`.
 
-Build Commands
-Backend build
-From the project root:
+### Terminal B: frontend
 
-npm run build
-Frontend build
-From inside pdf-ui/:
+From `pdf-ui/`:
 
+```bash
+npm run dev
+```
+
+Frontend runs on `http://localhost:5173`.
+
+## Build
+
+### Backend
+
+From project root:
+
+```bash
 npm run build
 ```
 
-### Manual API Test
-You can test the backend without the frontend using curl:
+### Frontend
+
+From `pdf-ui/`:
+
+```bash
+npm run build
 ```
+
+## Optional: Run compiled backend
+
+After backend build:
+
+```bash
+npm run start
+```
+
+## Manual API Test
+
+```bash
 curl -X POST http://localhost:8080/upload \
   -H "Content-Type: multipart/form-data" \
   -F "file=@/path/to/your/file.pdf"
 ```
-
-### Development Notes
-- The backend currently allows requests from http://localhost:5173
-- The upload endpoint is POST /upload
-- The uploaded file field name must be file
-- The backend currently limits uploaded files to 50 MB
-
-
-### Summary
-This project demonstrates a simple full-stack file upload flow:
-
-- React collects the PDF file from the user
-- The frontend sends it to the Express backend
-- The backend extracts text from the PDF
-- The frontend displays the result
-
