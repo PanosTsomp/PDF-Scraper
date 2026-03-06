@@ -1,138 +1,88 @@
 # PDF Scraper
 
-A full-stack PDF processing app with:
-- A TypeScript + Express backend (`src/server.ts`)
-- A React + Vite frontend (`pdf-ui/`)
+A full-stack web app for PDF processing:
+- `apps/api`: TypeScript + Express backend
+- `apps/web`: React + Vite frontend
 
-You can upload a PDF and choose one of these outputs:
-- JSON preview (text + metadata)
-- Download extracted text as `.txt`
-- Download rendered pages as `.zip` of `.png` images
-- Download converted `.docx`
-
-## Project Structure
+## Folder Structure
 
 ```text
 PDF-Scraper/
-├── src/
-│   ├── server.ts
-│   └── server.js
-├── pdf-ui/
-│   ├── src/
-│   │   ├── App.jsx
-│   │   ├── App.css
-│   │   └── main.jsx
-│   └── package.json
+├── apps/
+│   ├── api/
+│   │   ├── src/
+│   │   │   └── server.ts
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   └── web/
+│       ├── src/
+│       ├── package.json
+│       └── vite.config.js
+├── scripts/
+│   └── send-upload-request.sh
 ├── package.json
 └── README.md
 ```
 
-## Backend API
+## API Endpoints
 
 Base URL: `http://localhost:8080`
 
-- `GET /`
-  - Health check response: `backend is running`
-- `POST /upload`
-  - Input: multipart/form-data with `file` (PDF)
-  - Output: JSON with extracted text + PDF info
-- `POST /download-text`
-  - Input: multipart/form-data with `file` (PDF)
-  - Output: downloadable `extracted-text.txt`
-- `POST /extract-images`
-  - Input: multipart/form-data with `file` (PDF)
-  - Output: downloadable `pdf-pages.zip`
-- `POST /convert-to-docx`
-  - Input: multipart/form-data with `file` (PDF)
-  - Output: downloadable `converted.docx`
+- `GET /` health check
+- `POST /upload` parse PDF and return JSON preview
+- `POST /download-text` return extracted text as `.txt`
+- `POST /extract-images` return PDF pages as `.zip` of PNGs
+- `POST /convert-to-docx` return converted `.docx`
 
-### Backend Notes
+## Installation
 
-- CORS allows `http://localhost:5173`
-- Upload limit is `50MB`
-- Uploaded field name must be `file`
-- PDF parser instances are explicitly destroyed to avoid memory leaks
-
-## Frontend
-
-The frontend (`pdf-ui/src/App.jsx`) provides:
-- PDF file picker
-- Output type selector
-- One-click processing
-- JSON preview for `/upload`
-- Browser download flow for TXT/ZIP/DOCX endpoints
-
-## Setup
-
-### 1) Install backend dependencies
-
-From project root:
+Install dependencies for each app:
 
 ```bash
-npm install
+npm install --prefix apps/api
+npm install --prefix apps/web
 ```
 
-### 2) Install frontend dependencies
+## Development
+
+Run backend:
 
 ```bash
-cd pdf-ui
-npm install
+npm run dev:api
 ```
 
-## Run in Development
-
-You need two terminals.
-
-### Terminal A: backend
-
-From project root:
+Run frontend in a second terminal:
 
 ```bash
-npm run dev
+npm run dev:web
 ```
 
-Backend runs on `http://localhost:8080`.
-
-### Terminal B: frontend
-
-From `pdf-ui/`:
-
-```bash
-npm run dev
-```
-
-Frontend runs on `http://localhost:5173`.
+- API: `http://localhost:8080`
+- Web: `http://localhost:5173`
 
 ## Build
 
-### Backend
-
-From project root:
+Build both apps:
 
 ```bash
 npm run build
 ```
 
-### Frontend
-
-From `pdf-ui/`:
+Or build separately:
 
 ```bash
-npm run build
+npm run build:api
+npm run build:web
 ```
 
-## Optional: Run compiled backend
-
-After backend build:
+## Run API Production Build
 
 ```bash
-npm run start
+npm run start:api
 ```
 
 ## Manual API Test
 
 ```bash
-curl -X POST http://localhost:8080/upload \
-  -H "Content-Type: multipart/form-data" \
-  -F "file=@/path/to/your/file.pdf"
+bash scripts/send-upload-request.sh
 ```

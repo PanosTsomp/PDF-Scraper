@@ -1,16 +1,15 @@
 # Dependencies
 node_modules/
-pdf-ui/node_modules/
+apps/*/node_modules/
 
 # Builds
-dist/
-pdf-ui/dist/
+apps/*/dist/
 
-# TypeScript build output currently emitted into src/
-src/*.js
-src/*.js.map
-src/*.d.ts
-src/*.d.ts.map
+# TypeScript build output
+apps/api/src/*.js
+apps/api/src/*.js.map
+apps/api/src/*.d.ts
+apps/api/src/*.d.ts.map
 
 # Logs
 npm-debug.log*

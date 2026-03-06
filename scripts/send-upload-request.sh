@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+curl -X POST http://localhost:8080/upload \
+  -H "Content-Type: multipart/form-data" \
+  -F "file=@/path/to/your/file.pdf"
